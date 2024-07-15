@@ -38,11 +38,6 @@
 #include <stdbool.h>
 #include "timer_interface.h"
 
-/**
- * @ingroup tmr2
- * @brief Defines the TMR2 interrupt ticker factor
- */
-#define TMR2_INTERRUPT_TICKER_FACTOR    10
 
 /**
  * @ingroup tmr2

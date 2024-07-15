@@ -1,15 +1,13 @@
 /**
- * System Driver Header File
+ * WDT Generated Driver File.
  * 
- * @file system.h
+ * @file wdt.c
  * 
- * @defgroup systemdriver System Driver
+ * @ingroup  wdt
  * 
- * @brief This file contains the API prototypes and other datatypes for the System Driver.
+ * @brief This file contains the API implementation for the WDT driver.
  *
- * @version Driver Version 2.0.3
- *
- * @version Package Version 4.1.3
+ * @version WDT Driver Version 2.0.1
 */
 
 /*
@@ -33,32 +31,10 @@
     THIS SOFTWARE.
 */
 
-#ifndef SYSTEM_H
-#define	SYSTEM_H
+#include "../watchdog.h"
 
-#include <xc.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "config_bits.h"
-#include "../system/pins.h"
-#include "../adc/adc.h"
-#include "../fvr/fvr.h"
-#include "../nvm/nvm.h"
-#include "../timer/tmr0.h"
-#include "../timer/tmr2.h"
-#include "../system/watchdog.h"
-#include "../system/interrupt.h"
-#include "../system/clock.h"
-
-/**
- * @ingroup systemdriver
- * @brief Initializes the system module. This is called only once before calling other APIs.
- * @param None.
- * @return None.
-*/
-void SYSTEM_Initialize(void);
-
-#endif	/* SYSTEM_H */
-/**
- End of File
-*/
+void WDT_Initialize(void)
+{
+    //WDTSEN ON; WDTPS 1:32; WDTCS LFINTOSC (31 kHz); 
+    WDTCON = 0x1;
+}

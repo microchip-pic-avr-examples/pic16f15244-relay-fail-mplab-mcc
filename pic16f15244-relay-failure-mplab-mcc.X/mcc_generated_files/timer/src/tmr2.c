@@ -63,8 +63,8 @@ void TMR2_Initialize(void){
     T2HLT = 0x0;
     // TRSEL T2INPPS pin; 
     T2RST = 0x0;
-    // PR 242; 
-    T2PR = 0xF2;
+    // PR 1; 
+    T2PR = 0x1;
     // TMR 0x0; 
     T2TMR = 0x0;
 
@@ -75,8 +75,8 @@ void TMR2_Initialize(void){
     PIR1bits.TMR2IF = 0;
     // Enabling TMR2 interrupt.
     PIE1bits.TMR2IE = 1;
-    // TCKPS 1:128; TMRON on; TOUTPS 1:1; 
-    T2CON = 0xF0;
+    // TCKPS 1:16; TMRON on; TOUTPS 1:1; 
+    T2CON = 0xC0;
 }
 
 void TMR2_ModeSet(TMR2_HLT_MODE mode)
@@ -123,18 +123,12 @@ void TMR2_PeriodCountSet(size_t periodVal)
 
 void TMR2_ISR(void)
 {
-    static volatile unsigned int CountCallBack = 0;
     // clear the TMR2 interrupt flag
      PIR1bits.TMR2IF = 0;
 
-    // callback function - called every 10th pass
-    if (++CountCallBack >= TMR2_INTERRUPT_TICKER_FACTOR)
-    {
-        // ticker function call
-        TMR2_OverflowCallback();
-        // reset ticker counter
-        CountCallBack = 0;
-    }
+    // ticker function call;
+    // ticker is 1 -> Callback function gets called everytime this ISR executes
+    TMR2_OverflowCallback();
 }
 
 void TMR2_OverflowCallbackRegister(void (* InterruptHandler)(void))

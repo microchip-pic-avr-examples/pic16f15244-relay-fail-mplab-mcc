@@ -43,7 +43,10 @@ void SYSTEM_Initialize(void)
     PIN_MANAGER_Initialize();
     ADC_Initialize();
     FVR_Initialize();
+    NVM_Initialize();
+    Timer0_Initialize();
     TMR2_Initialize();
+    WDT_Initialize();
     INTERRUPT_Initialize();
 }
 

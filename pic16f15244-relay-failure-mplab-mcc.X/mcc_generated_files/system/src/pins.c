@@ -41,7 +41,7 @@ void PIN_MANAGER_Initialize(void)
     LATx registers
     */
     LATA = 0x0;
-    LATB = 0x40;
+    LATB = 0x0;
     LATC = 0x0;
 
     /**
