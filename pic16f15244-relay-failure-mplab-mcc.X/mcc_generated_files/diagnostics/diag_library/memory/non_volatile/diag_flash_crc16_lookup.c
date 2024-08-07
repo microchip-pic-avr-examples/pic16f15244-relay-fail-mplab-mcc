@@ -141,7 +141,7 @@ diag_result_t DIAG_FLASH_CalculateStoreCRC(flash_address_t startAddress, uint32_
     {
         //Calculate CRC-16 CCITT for given Flash region
         (void) DIAG_FLASH_CalculateCRC(startAddress, length, &crc);
-
+        
         //Store the calculated CRC to given address
         if (NVM_ERROR == DIAG_FLASH_StoreCRC16(storeAddress, crc))
         {

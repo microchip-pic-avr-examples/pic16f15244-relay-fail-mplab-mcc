@@ -1,15 +1,14 @@
 /**
- * WDT Generated Driver File.
+ * UART Generated Driver Interface Header File
  * 
- * @file wdt.c
+ * @file uart_types.h
  * 
- * @ingroup  wdt
+ * @defgroup uart_types UART_TYPES
  * 
- * @brief This file contains the API implementation for the WDT driver.
+ * @brief This file contains the enumeration of different Universal Asynchronous Receiver and Transmitter (UART) baud rates.
  *
- * @version WDT Driver Version 2.0.1
+ * @version UART Driver Version 3.0.2
 */
-
 /*
 © [2024] Microchip Technology Inc. and its subsidiaries.
 
@@ -31,10 +30,52 @@
     THIS SOFTWARE.
 */
 
-#include "../watchdog.h"
+#ifndef UART_TYPES_H
+#define	UART_TYPES_H
 
-void WDT_Initialize(void)
-{
-    //WDTSEN OFF; WDTPS 1:32; WDTCS LFINTOSC (31 kHz); 
-    WDTCON = 0x0;
+/**
+  Section: Included Files
+*/
+#include <stdbool.h>
+#include <stdint.h>
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+   
+/**
+  Section: Data Type Definitions
+*/ 
+      
+/**
+@ingroup uartdriver
+@enum UART_STANDARD_BAUDS
+@brief This Enum can be used to set the UART standard
+baud rates using \ref UARTx_BRGSet function e.g. \ref UART1_BRGSet.
+*/
+enum UART_STANDARD_BAUDS{
+UART_110 = 0,
+UART_300 = 1,
+UART_600 = 2,
+UART_1200 = 3,
+UART_2400 = 4,
+UART_4800 = 5,
+UART_9600 = 6,
+UART_14400 = 7,
+UART_19200 = 8,
+UART_38400 = 9,
+UART_57600 = 10,
+UART_115200 = 11,
+UART_230400 = 12,
+UART_460800 = 13,
+UART_921600 = 14,
+};
+
+
+#ifdef	__cplusplus
 }
+#endif
+
+#endif	/* UART_TYPES_H */
+

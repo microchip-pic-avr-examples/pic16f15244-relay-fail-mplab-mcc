@@ -23,9 +23,6 @@
             <logicalFolder name="cpu" displayName="cpu" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_library/cpu/diag_cpu_registers.h</itemPath>
             </logicalFolder>
-            <logicalFolder name="interrupt" displayName="interrupt" projectFiles="true">
-              <itemPath>mcc_generated_files/diagnostics/diag_library/interrupt/diag_int_frequency.h</itemPath>
-            </logicalFolder>
             <logicalFolder name="memory" displayName="memory" projectFiles="true">
               <logicalFolder name="non_volatile"
                              displayName="non_volatile"
@@ -34,13 +31,13 @@
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/non_volatile/diag_crc16_lookup_table.h</itemPath>
               </logicalFolder>
               <logicalFolder name="stack" displayName="stack" projectFiles="true">
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/stack/diag_stack_march_types.h</itemPath>
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/stack/diag_stack_marchc_minus.h</itemPath>
+                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/stack/diag_stack_march_types.h</itemPath>
               </logicalFolder>
               <logicalFolder name="volatile" displayName="volatile" projectFiles="true">
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_definitions.h</itemPath>
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_marchc_minus.h</itemPath>
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.h</itemPath>
+                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_marchc_minus.h</itemPath>
+                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_definitions.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="wdt" displayName="wdt" projectFiles="true">
@@ -65,7 +62,11 @@
         <logicalFolder name="timer" displayName="timer" projectFiles="true">
           <itemPath>mcc_generated_files/timer/timer_interface.h</itemPath>
           <itemPath>mcc_generated_files/timer/tmr2.h</itemPath>
-          <itemPath>mcc_generated_files/timer/tmr0.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="uart" displayName="uart" projectFiles="true">
+          <itemPath>mcc_generated_files/uart/eusart1.h</itemPath>
+          <itemPath>mcc_generated_files/uart/uart_types.h</itemPath>
+          <itemPath>mcc_generated_files/uart/uart_drv_interface.h</itemPath>
         </logicalFolder>
       </logicalFolder>
     </logicalFolder>
@@ -102,9 +103,6 @@
             <logicalFolder name="cpu" displayName="cpu" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_library/cpu/diag_cpu_registers.c</itemPath>
             </logicalFolder>
-            <logicalFolder name="interrupt" displayName="interrupt" projectFiles="true">
-              <itemPath>mcc_generated_files/diagnostics/diag_library/interrupt/diag_int_frequency.c</itemPath>
-            </logicalFolder>
             <logicalFolder name="memory" displayName="memory" projectFiles="true">
               <logicalFolder name="non_volatile"
                              displayName="non_volatile"
@@ -115,8 +113,8 @@
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/stack/diag_stack_marchc_minus.c</itemPath>
               </logicalFolder>
               <logicalFolder name="volatile" displayName="volatile" projectFiles="true">
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.c</itemPath>
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_marchc_minus.c</itemPath>
+                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.c</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="wdt" displayName="wdt" projectFiles="true">
@@ -147,7 +145,11 @@
         <logicalFolder name="timer" displayName="timer" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
             <itemPath>mcc_generated_files/timer/src/tmr2.c</itemPath>
-            <itemPath>mcc_generated_files/timer/src/tmr0.c</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="uart" displayName="uart" projectFiles="true">
+          <logicalFolder name="src" displayName="src" projectFiles="true">
+            <itemPath>mcc_generated_files/uart/src/eusart1.c</itemPath>
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
@@ -162,7 +164,7 @@
         <targetDevice>PIC16F15244</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>PK5Tool</platformTool>
+        <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.46</languageToolchainVersion>
         <platform>3</platform>
@@ -204,21 +206,21 @@
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
         <property key="define-macros" value=""/>
-        <property key="disable-optimizations" value="true"/>
+        <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories" value="mcc_generated_files"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
         <property key="identifier-length" value="255"/>
         <property key="local-generation" value="false"/>
-        <property key="operation-mode" value="pro"/>
+        <property key="operation-mode" value="std"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
         <property key="optimization-assembler-files" value="false"/>
         <property key="optimization-debug" value="false"/>
         <property key="optimization-invariant-enable" value="false"/>
         <property key="optimization-invariant-value" value="16"/>
-        <property key="optimization-level" value="-O0"/>
+        <property key="optimization-level" value="-O2"/>
         <property key="optimization-speed" value="false"/>
         <property key="optimization-stable-enable" value="false"/>
         <property key="preprocess-assembler" value="true"/>
@@ -382,6 +384,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-fff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/c62081/Documents/Git Repos/pic16f15244-relay-fail-mplab-mcc/pic16f15244-relay-failure-mplab-mcc.X/debug/free/pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programmerToGoImageName"
                   value="pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
@@ -472,7 +476,7 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-fff"/>
-        <property key="poweroptions.powerenable" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoImageName"
                   value="pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
@@ -512,7 +516,7 @@
         <targetDevice>PIC16F15244</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.46</languageToolchainVersion>
         <platform>3</platform>

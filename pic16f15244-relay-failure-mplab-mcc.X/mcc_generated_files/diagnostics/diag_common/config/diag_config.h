@@ -24,10 +24,6 @@
 
 #include <xc.h>
 #include "../../../nvm/nvm.h"
-#include "../../../timer/tmr0.h"
-
-#define TMR0_StartTimer Timer0_Start
-#define TMR0_SetInterruptHandler Timer0_OverflowCallbackRegister
 
 #define DIAG_FLASH_START_ADDR (0x0U)
 #define DIAG_FLASH_LENGTH (2047U)
@@ -58,35 +54,5 @@
 #define BANK2_END_ADDRESS (0x170U)
 #define BANK1_START_ADDRESS (0xa0U)
 #define BANK1_END_ADDRESS (0xf0U)
-
-/**
- @enum diag_int_id_t
- @brief This enumeration holds the identifiers for the interrupts that should be monitored.
-        These identifiers are used in the interrupt when calling functions related to the interrupt monitor.
- @var diag_int_id_t:: moduleName_interruptName
-	  Identifier of the interrupt to be monitored \n
- @var diag_int_id_t:: MAX_INT_LIMIT
-      Number of registered interrupts.  \n
- */
-typedef enum
-{
-    INVALID_INT_ID,
-    //Add custom interrupt IDs to be called in the ISRs
-    //ADC_ADI,
-    //CCP1_CCPI,
-    //CCP2_CCPI,
-    //EUSART1_RCI,
-    //EUSART1_TXI,
-    //EXT_INT_INTI,
-    //MEMORY_NVMI,
-    //MSSP1_BCLI,
-    //MSSP1_SSPI,
-    //PIN_MANAGER_IOCI,
-    //TMR0_TMRI,
-    //TMR1_TMRGI,
-    //TMR1_TMRI,
-    //TMR2_TMRI,
-    MAX_INT_LIMIT
-}diag_int_id_t;
 
 #endif //DIAG_CONFIG_H

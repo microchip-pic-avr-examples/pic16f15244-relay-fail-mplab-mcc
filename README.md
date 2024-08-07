@@ -8,9 +8,9 @@
    </picture>
 </a>
 
-# Update the title for pic16f15244-relay-fail-mplab-mcc here
+# Detecting Relay Failures with the PIC16F15244 Family of Microcontrollers (MCUs)
 
-<!-- This is where the introduction to the example goes, including mentioning the peripherals used -->
+Electro-mechanical relays are a common component used to isolate power or signals. However, relays can fail over time due to mechanical wear, electrical contacts wearing out, armatures jamming, or burned out coils. This example shows a simple way to detect a failed relay using the Analog to Digital Converter (ADC) on the PIC16F15244 family of microcontrollers. Class B functional safety libraries are also used to verify the microcontroller is operating correctly. 
 
 ## Related Documentation
 
@@ -40,12 +40,124 @@
 
 ## Setup
 
-<!-- Explain how to connect hardware and set up software. Depending on complexity, step-by-step instructions and/or tables and/or images can be used -->
+For demonstration purposes, the following design was assembled on a protoboard.
+
+TODO: Image
+
+**Note: Component values are application specific. Please see the Design Procedure section for more information.**
+
+## Self-Tests
+
+### Functional Safety Class B Library
+
+- CPU  
+
+This test verifies the CPU registers are operating correctly.
+
+- Flash
+
+This test verifies the Flash program memory matches the expected checksum.
+
+- SRAM
+
+This test verifies the SRAM is functioning correctly at Power-on-Reset (POR), and periodically scan
+
+- Stack
+
+This test verifies the hardware stack in the microcontroller is operating correctly.
+
+- Watchdog
+
+This test verifies the WDT hardware is operational.
+
+- Interrupt
+
+This test verifies that interrupts occur at the correct rate. For this example, the ADC interrupt is monitored.
+
+### Other
+
+- Transistor Short to GND/VDD
+
+If the PORT value (digital input) on the transistor pin does not match the expected `LAT` state (digital output), then the transistor has failed short to VDD or GND.
+
+**Note: If the relay coil runs from a voltage higher than the microcontroller (ex: +12V), then a short to VDD could expose the microcontroller to this voltage.**
+
+- Relay Jammed
+
+If the relay does not transition to the correct state within the time limits set, then the relay is considered to be jammed.
+
+- Unexpected power applied to/missing from output
+
+If voltage is detected/missing from the output at the wrong relay state, then 
+
+- Bad Connection / Brownout
+
+If the relay is in a steady state OPEN/CLOSED, and the voltage is in an invalid threshold, then the device reports a brownout or bad connection. 
+
+- SRAM Corruption
+
+If the `relayState` or `errorState` variables mismatch from a copy `relayState2` or `errorState2`, then the device reports a self-test failure.
+
+## Theory of Operation
+
+This application controls and monitors an electromechanical relay to ensure the relay contacts have not jammed and are switching correctly. A simple state machine is used to keep track of the state of the relay. 
+
+TODO: Image
+
+**Note: The relay used in this example is non-latching.**
+
+On POR, the microcontroller starts in the `OPEN` state. Every ??? seconds, the microcontroller gets an interrupt from Timer 2 to switch the relay ON/OFF. When this occurs, the microcontroller transitions to the `RELAY_OPEN_TRANSITION_CLOSED` or `RELAY_CLOSE_TRANSITION_OPEN` state and switches the relay coil transistor ON or OFF. 
+
+When switched, relay contacts bounce for a few milliseconds. The ADC constantly monitors the output, but in these transition states, the output is ignored for a few milliseconds (see relay datasheet) to avoid any contact bounce. The delay time is controlled by `RELAY_CLOSE_TIME_MAX` and `RELAY_OPEN_TIME_MAX`. After these have elapsed, the relay must reach the desired state within `RELAY_MARGIN` milliseconds, or it will be considered a malfunction.
+
+To determine the relay state, two constants `ADC_THRESHOLD_HIGH` and `ADC_THRESHOLD_LOW` are used as thresholds for ON and OFF. The PIC16F15244 family of microcontrollers has a 10-bit ADC and a Fixed Voltage Reference (FVR). To convert a voltage into a threshold, the following formula can be used:
+
+TODO: Image
+
+## Error Flags
+
+A bit mask of error flags are defined to detect if an error occurs.
+
+| Bit Number | Flag Name | Description
+| ---------- | --------- | ------------
+| 7 | Unused | N/A
+| 6 | Unused | N/A
+| 5 | Unused | N/A
+| 4 | ERROR_OUTPUT_BROWNOUT | Set if the output in steady-state is not within the defined thresholds. 
+| 3 | ERROR_ILLEGAL_STATE | Set if the state machine is in an invalid state.
+| 2 | ERROR_SELF_TEST_FAIL | Set if an internal self-test fails. 
+| 1 | ERROR_TRANSISTOR_SHORT | Set when the coil drive pin state (1 or 0) does not match the expected output state (1 or 0).
+| 0 | ERROR_RELAY_STUCK | Set when the relay has not transitioned in the expected time.
+
+## Design Procedure
+
+Often relays switch voltages that are far above the absolute maximum rating of the MCU. To avoid damage, the microcontroller needs to measure a scaled down version of the signal. If the microcontroller and signal don't require isolation, a voltage divider can be used. If isolation is required, a device like an optocoupler can be used. 
+
+### Voltage Divider (Non-Isolated)
+
+A voltage divider is composed of two resistors in the following configuration:
+
+TODO: Image
+
+When the ADC starts a measurement, a capacitor is connected from the center node to ground. The time required for the ADC to get an accurate reading (<0.5 LSB) is dependent on the capacitance of the sampling capacitor and the input impedance to it. Using circuit analysis, the input impedance visible to the ADC can be computed using the following formula:
+
+TODO: Image
+
+On the PIC16F15244 family, the acquisition time is fixed at 2 &micro;S. The datasheet recommends an impedance of 10 k&Omega; or less. Impedances above this value will function, however it will take multiple sampling cycles for the measured to approach the expected value.  
+
+### OptoCoupler (Isolated)
+
+If isolation is required, a linear optocoupler is a simple way of providing feedback to the microcontroller. An optocoupler is composed of two elements - an LED and a photodiode lnside a single package. The output of a linear optocoupler is a function of the current through the LED. For detailed design guidence on the optocoupler, please consult the manufacturer. 
 
 ## Operation
 
-<!-- Explain how to operate the example. Depending on complexity, step-by-step instructions and/or tables and/or images can be used -->
+Red LED - Error
+Green LED - Transistor Drive State (LAT)
+Yellow LED - Load
+
+JP1 (Normally Open) - Short to simulate a welded contact
+JP2 (Normally Short) - Open to simulate a jammed contact
 
 ## Summary
 
-<!-- Summarize what the example has shown -->
+This example has shown how to implement a relay failure detector on the PIC16F15244 family of microcontrollers.
