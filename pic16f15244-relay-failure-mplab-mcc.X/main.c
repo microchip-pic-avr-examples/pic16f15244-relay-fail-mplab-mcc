@@ -65,7 +65,7 @@ typedef enum {
 //Relay FSM States
 typedef enum {
     RELAY_OPEN = 0, RELAY_OPEN_TRANSITION_CLOSED, 
-    RELAY_CLOSED, RELAY_CLOSE_TRANSITION_OPEN
+    RELAY_CLOSED, RELAY_CLOSE_TRANSITION_OPEN, RELAY_ERROR
 } relay_state_t;
 
 //State Variables
@@ -87,6 +87,9 @@ volatile uint8_t relayCountMax = 0;
 //Sets the error flag
 void SetError(error_state_t error)
 {
+    //Disable the relay drive
+    RELAY_DRIVE_SetLow();
+    
     //Verify the error parameter is valid
     if ((error != ERROR_RELAY_STUCK) && (error != ERROR_TRANSISTOR_SHORT) &&
             (error != ERROR_SELF_TEST_FAIL) && (error != ERROR_ILLEGAL_STATE))
@@ -98,8 +101,12 @@ void SetError(error_state_t error)
     errorState |= error;
     errorState2 |= error;
     
-    //Set the LED
+    relayState = RELAY_ERROR;
+    relayState2 = RELAY_ERROR;
+    
+    //Set the LEDs
     ERROR_LED_SetHigh();
+    RELAY_STATE_LED_SetLow();
     
     errorChanged = true;
 }
@@ -127,12 +134,35 @@ void SetRelayState(relay_state_t state)
             RELAY_STATE_LED_SetHigh();
             break;
         }
+        case RELAY_ERROR:
+        {
+            //Stop driving the relay due to an error
+            RELAY_STATE_LED_SetLow();
+            break;
+        }
         default:
         {
             //Unknown error
             SetError(ERROR_ILLEGAL_STATE);
         }
     }
+}
+
+//Clears the error flags
+void ClearErrors(void)
+{
+    //Clear Error States
+    errorState = 0x00;
+    errorState2 = 0x00;
+    
+    //Print a new message
+    errorChanged = true;
+    
+    //Update LED
+    ERROR_LED_SetLow();
+    
+    //Update Relay State Machine
+    SetRelayState(RELAY_OPEN);
 }
 
 //Process the ADC Result
@@ -172,6 +202,11 @@ void OnADCResultReady(void)
             {
                 //Transitioning from Closed -> Open
                 //Keep waiting
+                break;
+            }
+            case RELAY_ERROR:
+            {
+                //Error State
                 break;
             }
             default:
@@ -214,6 +249,11 @@ void OnADCResultReady(void)
                 
                 break;
             }
+            case RELAY_ERROR:
+            {
+                //Error State
+                break;
+            }
             default:
             {
                 //Something went wrong!
@@ -248,6 +288,11 @@ void OnADCResultReady(void)
                 //Transitioning from Closed -> Open
                 break;
             }
+            case RELAY_ERROR:
+            {
+                //Error State
+                break;
+            }
             default:
             {
                 //Something went wrong!
@@ -280,6 +325,16 @@ void SwitchState(void)
             
             RELAY_DRIVE_SetLow();
             SetRelayState(RELAY_CLOSE_TRANSITION_OPEN);
+            break;
+        }
+        case RELAY_ERROR:
+        {
+            //An Error Occurred
+            break;
+        }
+        default:
+        {
+            //Switching error
             break;
         }
     }
@@ -328,6 +383,12 @@ void PeriodicScan(void)
         {
             relayCount++;
         }
+    }
+    
+    //Clear any errors
+    if (SW_GetValue() == 0)
+    {
+        ClearErrors();
     }
     
     //Time to switch the relay
@@ -442,6 +503,11 @@ int main(void)
             errorChanged = false;
             
             //Print the error codes
+            
+            if (errorState == ERROR_NONE)
+            {
+                printf("> All Error Cleared\r\n");
+            }
             
             if (errorState & ERROR_RELAY_STUCK)
             {
