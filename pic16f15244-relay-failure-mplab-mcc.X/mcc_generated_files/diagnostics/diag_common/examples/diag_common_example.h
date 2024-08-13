@@ -19,36 +19,12 @@
     THIS SOFTWARE.
 */
 
-#ifndef DIAG_CONFIG_H
-#define DIAG_CONFIG_H
+#ifndef DIAG_COMMON_EXAMPLE_H
+#define DIAG_COMMON_EXAMPLE_H
 
-#include <xc.h>
-#include "../../../nvm/nvm.h"
+#define EXAMPLE_SRAM_FULL    0
+#define EXAMPLE_SRAM_BANK    1
 
-#define DIAG_FLASH_START_ADDR (0x0U)
-#define DIAG_FLASH_LENGTH (2047U)
-#define DIAG_FLASH_CRC_STORE_ADDR (0xffeU)
+void DIAG_SRAM_CheckerboardExample(void);
 
-#define SRAM_CHECKERBOARD_START_ADDRESS (0x20U)
-#define SRAM_CHECKERBOARD_BUFFER_ADDRESS    (0xa0U)
-#define SRAM_CHECKERBOARD_LENGTH  (80U)
-
-#define NO_OF_BANKS (7U)
-
-// The following bank information is used as reference for SRAM Tests
-#define BANK6_START_ADDRESS (0x320U)
-#define BANK6_END_ADDRESS (0x330U)
-#define BANK5_START_ADDRESS (0x2a0U)
-#define BANK5_END_ADDRESS (0x2f0U)
-#define BANK0_START_ADDRESS (0x20U)
-#define BANK0_END_ADDRESS (0x70U)
-#define BANK4_START_ADDRESS (0x220U)
-#define BANK4_END_ADDRESS (0x270U)
-#define BANK3_START_ADDRESS (0x1a0U)
-#define BANK3_END_ADDRESS (0x1f0U)
-#define BANK2_START_ADDRESS (0x120U)
-#define BANK2_END_ADDRESS (0x170U)
-#define BANK1_START_ADDRESS (0xa0U)
-#define BANK1_END_ADDRESS (0xf0U)
-
-#endif //DIAG_CONFIG_H
+#endif /* DIAG_COMMON_EXAMPLE_H */

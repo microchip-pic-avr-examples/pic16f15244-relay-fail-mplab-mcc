@@ -15,6 +15,9 @@
             <logicalFolder name="config" displayName="config" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_common/config/diag_config.h</itemPath>
             </logicalFolder>
+            <logicalFolder name="examples" displayName="examples" projectFiles="true">
+              <itemPath>mcc_generated_files/diagnostics/diag_common/examples/diag_common_example.h</itemPath>
+            </logicalFolder>
             <itemPath>mcc_generated_files/diagnostics/diag_common/diag_result_type.h</itemPath>
           </logicalFolder>
           <logicalFolder name="diag_library"
@@ -36,7 +39,6 @@
               </logicalFolder>
               <logicalFolder name="volatile" displayName="volatile" projectFiles="true">
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.h</itemPath>
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_marchc_minus.h</itemPath>
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_definitions.h</itemPath>
               </logicalFolder>
             </logicalFolder>
@@ -69,6 +71,7 @@
           <itemPath>mcc_generated_files/uart/uart_drv_interface.h</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <itemPath>relay.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -93,6 +96,9 @@
         </logicalFolder>
         <logicalFolder name="diagnostics" displayName="diagnostics" projectFiles="true">
           <logicalFolder name="diag_common" displayName="diag_common" projectFiles="true">
+            <logicalFolder name="examples" displayName="examples" projectFiles="true">
+              <itemPath>mcc_generated_files/diagnostics/diag_common/examples/diag_common_example.c</itemPath>
+            </logicalFolder>
             <logicalFolder name="startup" displayName="startup" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_common/startup/powerup.as</itemPath>
             </logicalFolder>
@@ -113,7 +119,6 @@
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/stack/diag_stack_marchc_minus.c</itemPath>
               </logicalFolder>
               <logicalFolder name="volatile" displayName="volatile" projectFiles="true">
-                <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_marchc_minus.c</itemPath>
                 <itemPath>mcc_generated_files/diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.c</itemPath>
               </logicalFolder>
             </logicalFolder>
@@ -154,6 +159,7 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>main.c</itemPath>
+      <itemPath>relay.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -166,7 +172,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.46</languageToolchainVersion>
+        <languageToolchainVersion>2.50</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -247,7 +253,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value=""/>
+        <property key="code-model-rom" value="default,-FE0-FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -516,9 +522,9 @@
         <targetDevice>PIC16F15244</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>pk4hybrid</platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.46</languageToolchainVersion>
+        <languageToolchainVersion>2.50</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -599,7 +605,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value=""/>
+        <property key="code-model-rom" value="default,-FE0-FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
