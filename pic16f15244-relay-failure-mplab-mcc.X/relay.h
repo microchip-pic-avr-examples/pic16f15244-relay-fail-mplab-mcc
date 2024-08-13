@@ -24,7 +24,8 @@ extern "C" {
 //Error conditions for the program
 typedef enum {
     ERROR_NONE = 0, ERROR_RELAY_STUCK = 1, ERROR_TRANSISTOR_SHORT = 2, 
-        ERROR_SELF_TEST_FAIL = 4, ERROR_ILLEGAL_STATE = 8, ERROR_OUTPUT_BROWNOUT = 16
+    ERROR_SELF_TEST_FAIL = 4, ERROR_ILLEGAL_STATE = 8, ERROR_OUTPUT_BROWNOUT = 16,
+    ERROR_MEMORY_WRITE_FAIL = 32
 } error_state_t;
 
 //Relay FSM States

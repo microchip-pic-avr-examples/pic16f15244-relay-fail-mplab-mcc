@@ -33,6 +33,8 @@ void Relay_SetError(error_state_t error)
         error = ERROR_ILLEGAL_STATE;
     }
     
+    error_state_t tempErr = errorState;
+    
     //OR the state variables
     errorState |= error;
     errorState2 |= error;
@@ -44,7 +46,10 @@ void Relay_SetError(error_state_t error)
     ERROR_LED_SetHigh();
     RELAY_STATE_LED_SetLow();
     
-    errorChanged = true;
+    if (tempErr != errorState)
+    {
+        errorChanged = true;
+    }
 }
 
 //Set the relay state
@@ -87,12 +92,15 @@ void Relay_SetState(relay_state_t state)
 //Clears the error flags
 void Relay_ClearErrors(void)
 {
+    //Flag a change in error state
+    if (errorState != ERROR_NONE)
+    {
+        errorChanged = true;
+    }
+    
     //Clear Error States
     errorState = 0x00;
     errorState2 = 0x00;
-    
-    //Print a new message
-    errorChanged = true;
     
     //Update LED
     ERROR_LED_SetLow();

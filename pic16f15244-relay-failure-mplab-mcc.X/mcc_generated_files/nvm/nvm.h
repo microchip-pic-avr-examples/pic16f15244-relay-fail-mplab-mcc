@@ -48,7 +48,7 @@
  * @def PROGMEM_SIZE
  * Contains the size of Flash in 14-bit words.
  */
-#define PROGMEM_SIZE         (0x1000U)
+#define PROGMEM_SIZE         (0x2000U)
 
 /**
  * @ingroup nvm_driver

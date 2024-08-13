@@ -15,9 +15,6 @@
             <logicalFolder name="config" displayName="config" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_common/config/diag_config.h</itemPath>
             </logicalFolder>
-            <logicalFolder name="examples" displayName="examples" projectFiles="true">
-              <itemPath>mcc_generated_files/diagnostics/diag_common/examples/diag_common_example.h</itemPath>
-            </logicalFolder>
             <itemPath>mcc_generated_files/diagnostics/diag_common/diag_result_type.h</itemPath>
           </logicalFolder>
           <logicalFolder name="diag_library"
@@ -96,9 +93,6 @@
         </logicalFolder>
         <logicalFolder name="diagnostics" displayName="diagnostics" projectFiles="true">
           <logicalFolder name="diag_common" displayName="diag_common" projectFiles="true">
-            <logicalFolder name="examples" displayName="examples" projectFiles="true">
-              <itemPath>mcc_generated_files/diagnostics/diag_common/examples/diag_common_example.c</itemPath>
-            </logicalFolder>
             <logicalFolder name="startup" displayName="startup" projectFiles="true">
               <itemPath>mcc_generated_files/diagnostics/diag_common/startup/powerup.as</itemPath>
             </logicalFolder>
@@ -167,10 +161,10 @@
     <conf name="free" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F15244</targetDevice>
+        <targetDevice>PIC16F15245</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>pk4hybrid</platformTool>
+        <platformTool>PK5Tool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.50</languageToolchainVersion>
         <platform>3</platform>
@@ -253,7 +247,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="default,-FE0-FFF"/>
+        <property key="code-model-rom" value="default,-1FE0-1FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -321,7 +315,9 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-fff"/>
-        <property key="poweroptions.powerenable" value="false"/>
+        <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/c62081/Documents/Git Repos/pic16f15244-relay-fail-mplab-mcc/pic16f15244-relay-failure-mplab-mcc.X/debug/free/pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programmerToGoImageName"
                   value="pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
@@ -389,7 +385,7 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-fff"/>
-        <property key="poweroptions.powerenable" value="false"/>
+        <property key="poweroptions.powerenable" value="true"/>
         <property key="programmerToGoFilePath"
                   value="C:/Users/c62081/Documents/Git Repos/pic16f15244-relay-fail-mplab-mcc/pic16f15244-relay-failure-mplab-mcc.X/debug/free/pic16f15244-relay-failure-mplab-mcc_ptg"/>
         <property key="programmerToGoImageName"
@@ -519,7 +515,7 @@
     <conf name="pro" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F15244</targetDevice>
+        <targetDevice>PIC16F15245</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>noID</platformTool>
@@ -605,7 +601,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="default,-FE0-FFF"/>
+        <property key="code-model-rom" value="default,-1FE0-1FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>

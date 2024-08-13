@@ -38,6 +38,8 @@
 #include "mcc_generated_files/diagnostics/diag_library/memory/non_volatile/diag_flash_crc16.h"
 #include "mcc_generated_files/diagnostics/diag_library/cpu/diag_cpu_registers.h"
 #include "mcc_generated_files/diagnostics/diag_library/wdt/diag_wdt_startup.h"
+#include "diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.h"
+#include "diagnostics/diag_library/memory/stack/diag_stack_marchc_minus.h"
 
 //Defines the number of timer counts (~1ms per count) before the relay toggles
 #define RELAY_TOGGLE_TIME 5000
@@ -45,15 +47,130 @@
 //How often should the PFM be scanned? (~1ms per count)
 #define FUSA_MEM_SELF_TEST 120000
 
+//How often should the standard FUSA tests run? (~1ms per count)
+#define FUSA_SELF_TEST 6000
+
+#define GPRCOUNT _GPRCOUNT_
+
+static const uint16_t startAddressTable[GPRCOUNT] = {
+    BANK0_START_ADDRESS,
+    BANK10_START_ADDRESS,
+    BANK11_START_ADDRESS,
+    BANK12_START_ADDRESS,
+    BANK1_START_ADDRESS,
+    BANK2_START_ADDRESS,
+    BANK3_START_ADDRESS,
+    BANK4_START_ADDRESS,
+    BANK5_START_ADDRESS,
+    BANK6_START_ADDRESS,
+    BANK7_START_ADDRESS,
+    BANK8_START_ADDRESS,
+    BANK9_START_ADDRESS,
+};
+static const uint16_t endAddressTable[GPRCOUNT] = {
+    BANK0_END_ADDRESS,
+    BANK10_END_ADDRESS,
+    BANK11_END_ADDRESS,
+    BANK12_END_ADDRESS,
+    BANK1_END_ADDRESS,
+    BANK2_END_ADDRESS,
+    BANK3_END_ADDRESS,
+    BANK4_END_ADDRESS,
+    BANK5_END_ADDRESS,
+    BANK6_END_ADDRESS,
+    BANK7_END_ADDRESS,
+    BANK8_END_ADDRESS,
+    BANK9_END_ADDRESS,
+};
+
+//Bank used for buffer
+#define BANK3 3
+
+//EEPROM Version ID
+#define EEPROM_VERSION 0x01
+
+//Address where the version ID byte is located
+#define EEPROM_VERSION_ADDR 0x1FE0
+
 //Set to true to run a CRC scan of the PFM
-volatile bool runMemTest = false;
+static volatile bool runMemTest = false;
+
+//Memory Bank to scan
+static volatile uint8_t memBank = 0;
+
+//Set to true when a periodic fusa test has passed (for printing only)
+static volatile bool periodicFusaPass = false;
+
+//Tests a memory bank
+diag_result_t Application_testMemoryBank(uint8_t bank)
+{
+    //Invalid Bank
+    if (bank >= GPRCOUNT)
+    {
+        return DIAG_FAIL;
+    }
+    
+    volatile uint16_t bufferAddress;
+    volatile uint8_t bankLength;
+    diag_result_t result = DIAG_FAIL;
+    
+    if (bank == BANK3)
+    {
+        //Last memory bank, so choose the previous for a buffer
+        bufferAddress = BANK4_START_ADDRESS;
+    }
+    else
+    {
+        //Use the next memory bank for a buffer
+        bufferAddress = BANK3_START_ADDRESS;
+    }
+    
+    //Get the memory bank length
+    bankLength = (uint8_t)(endAddressTable[bank] - startAddressTable[bank]);
+    
+    //Run the test
+    result = DIAG_SRAM_Checkerboard(startAddressTable[bank], bankLength, bufferAddress);
+    
+    return result;
+}
+
+//Run a periodic self-test
+diag_result_t Application_runPeriodicSelfTest(void)
+{
+    //CPU Test
+    if (DIAG_CPU_Registers() != DIAG_PASS)
+    {
+        return DIAG_FAIL;
+    }
+    
+    //Rotate through SRAM
+    if (Application_testMemoryBank(memBank) != DIAG_PASS)
+    {
+        return DIAG_FAIL;
+    }
+    
+    //Increment to the next memory bank
+    if (memBank < GPRCOUNT)
+    {
+        memBank++;
+    }
+    else
+    {
+        memBank = 0;
+    }
+    
+    periodicFusaPass = true;
+    
+    return DIAG_PASS;
+}
 
 //1ms Periodic Function
-void PeriodicScan(void)
+void Application_PeriodicScan(void)
 {
     static uint16_t toggleCounter = 0;
+    static uint32_t memScanCounter = 0;
     static uint32_t fusaCounter = 0;
-    
+        
     //Periodic Self-Test of the Relay Systems
     Relay_SelfTest();
     
@@ -61,9 +178,10 @@ void PeriodicScan(void)
     if (SW_GetValue() == 0)
     {
         Relay_ClearErrors();
+        toggleCounter = 0;
     }
     
-    //Time to switch the relay
+    //Time to switch the relay?
     if (toggleCounter >= RELAY_TOGGLE_TIME)
     {
         toggleCounter = 0;
@@ -74,17 +192,34 @@ void PeriodicScan(void)
         toggleCounter++;
     }
     
-    //Time to run fusa self-test?
-    if (fusaCounter >= FUSA_MEM_SELF_TEST)
+    //Time to run standard fusa self-test?
+    if (fusaCounter >= FUSA_SELF_TEST)
     {
         fusaCounter = 0;
+        
+        //Periodic Fusa Tests
+        if (Application_runPeriodicSelfTest() != DIAG_PASS)
+        {
+            Relay_SetError(ERROR_SELF_TEST_FAIL);
+        }
+        
+    }
+    else
+    {
+        fusaCounter++;
+    }
+    
+    //Time to run memory self-test?
+    if (memScanCounter >= FUSA_MEM_SELF_TEST)
+    {
+        memScanCounter = 0;
         
         //Queue Memory Scan
         runMemTest = true;
     }
     else
     {
-        fusaCounter++;
+        memScanCounter++;
     }
     
     //Clear WDT
@@ -92,18 +227,28 @@ void PeriodicScan(void)
 }
 
 //Check the self-tests
-void CheckStartupTests(void)
+void Application_CheckStartupTests(void)
 {
     if (DIAG_CPU_Registers() != DIAG_PASS)
     {
         //CPU Register Self-Test Failed
         printf("CPU Self-Test Failed\r\n");
+        Relay_SetError(ERROR_SELF_TEST_FAIL);
+    }
+    else
+    {
+        printf("CPU Self-Test OK\r\n");
     }
     
     if (DIAG_WDT_GetResult() != DIAG_PASS)
     {
         //WDT Self-Test Failed
         printf("WDT Self-Test Failed\r\n");
+        Relay_SetError(ERROR_SELF_TEST_FAIL);
+    }
+    else
+    {
+        printf("WDT Self-Test OK\r\n");
     }
     
     if (DIAG_FLASH_ValidateCRC(DIAG_FLASH_START_ADDR, 
@@ -111,15 +256,50 @@ void CheckStartupTests(void)
     {
         //Flash CRC Failed
         printf("Flash CRC Self-Test Failed\r\n");
+        Relay_SetError(ERROR_SELF_TEST_FAIL);
+    }
+    else
+    {
+        printf("Flash CRC Self-Test OK\r\n");
     }
     
     //SRAM
+    //Test all banks    
+    for (uint8_t i = 0; i < GPRCOUNT; i++)
+    {
+        diag_result_t t = Application_testMemoryBank(i);
+        if (t == DIAG_FAIL)
+        {
+            printf("SRAM Bank %u Self-Test Failed - Memory Bad\r\n", i);
+            Relay_SetError(ERROR_SELF_TEST_FAIL);
+        }
+        else if (t == DIAG_INVALID_ARG)
+        {
+            printf("SRAM Bank %u Self-Test Failed - Invalid Argument Passed\r\n", i);
+            Relay_SetError(ERROR_SELF_TEST_FAIL);
+        }
+        else if (t == DIAG_PASS)
+        {
+            printf("SRAM Bank %u Self-Test OK\r\n", i);
+        }
+        else
+        {
+            //Unknown
+            printf("SRAM Bank %u Self-Test Failed - Unknown Error\r\n", i);
+            Relay_SetError(ERROR_SELF_TEST_FAIL);
+        }
+    }
+    
+//    //Stack
+//    if (DIAG_STACK_MarchCMinus() == DIAG_PASS)
+//    {
+//        printf("Stack Self-Test OK\r\n");
+//    }
+//    else
+//    {
+//        printf("Stack Self-Test Failed\r\n");
+//    }
 }
-
-#define EEPROM_VERSION 0x01
-
-//Address where the marker byte is located
-#define EEPROM_VERSION_ADDR 0xFE0
 
 int main(void)
 {
@@ -140,6 +320,7 @@ int main(void)
         if (FLASH_PageErase(addr) == NVM_ERROR)
         {
             printf("An NVM erase error has occurred\r\n");
+            Relay_SetError(ERROR_MEMORY_WRITE_FAIL);
         }
         NVM_UnlockKeyClear();
         
@@ -156,6 +337,7 @@ int main(void)
         if (FLASH_RowWrite(addr, &data[0]) == NVM_ERROR)
         {
             printf("An NVM row write error has occurred\r\n");
+            Relay_SetError(ERROR_MEMORY_WRITE_FAIL);
         }
         NVM_UnlockKeyClear();
         
@@ -168,6 +350,7 @@ int main(void)
         else
         {
             printf("An error has occurred while writing CRC\r\n");
+            Relay_SetError(ERROR_MEMORY_WRITE_FAIL);
         }        
         
         printf("CRC Write Complete\r\n");
@@ -178,15 +361,14 @@ int main(void)
     }
     
     //Check Functional Safety Tests
-    CheckStartupTests();
+    Application_CheckStartupTests();
     
     //TODO: Implement periodic FUSA 
-    //TODO: Implement debouncing/one-shot for button
 
     printf("\r\n");
     
     //Switch the state of the relay
-    Timer2_OverflowCallbackRegister(&PeriodicScan);
+    Timer2_OverflowCallbackRegister(&Application_PeriodicScan);
     
     //Handle the ADC Results
     ADC_SetInterruptHandler(&Relay_onADCReady);
@@ -207,17 +389,45 @@ int main(void)
     {        
         if (runMemTest)
         {
+            //Enable WDT
+            WDTCONbits.SEN = 0;
+            
             //Clear flag
             runMemTest = false;
+            
             //Run CRC Scan
             diag_result_t result = DIAG_FLASH_ValidateCRC(DIAG_FLASH_START_ADDR, 
                     DIAG_FLASH_LENGTH, DIAG_FLASH_CRC_STORE_ADDR);
 
-            if (result == DIAG_FAIL)
+            if (result == DIAG_PASS)
+            {
+                printf("Periodic Flash CRC Self-Test OK\r\n");
+            }
+            else
             {
                 //Set a self-test error
+                printf("Periodic Flash CRC Self-Test Failed\r\n");
                 Relay_SetError(ERROR_SELF_TEST_FAIL);
             }
+            
+//            //Run a Stack Test
+//            if (DIAG_STACK_MarchCMinus() == DIAG_PASS)
+//            {
+//                printf("Periodic Stack Self-Test OK\r\n");
+//            }
+//            else
+//            {
+//                printf("Periodic Stack Self-Test Failed\r\n");
+//            }
+            
+            //Enable WDT
+            WDTCONbits.SEN = 1;
+        }
+        
+        if (periodicFusaPass)
+        {
+            periodicFusaPass = false;
+            printf("Periodic Self-Test OK\r\n");
         }
         
         if (Relay_hasErrorOccurred())
@@ -228,12 +438,10 @@ int main(void)
             
             printf("System Error State: 0x%x\r\n", errState);
             
-            
-            //Print the error codes
-            
+            //Print the error codes            
             if (errState == ERROR_NONE)
             {
-                printf("> All Error Cleared\r\n");
+                printf("> All Errors Cleared\r\n");
                 continue;
             }
             
@@ -260,6 +468,11 @@ int main(void)
             if (errState & ERROR_OUTPUT_BROWNOUT)
             {
                 printf("> OUTPUT_BROWNOUT\r\n");
+            }
+            
+            if (errState & ERROR_MEMORY_WRITE_FAIL)
+            {
+                printf("> MEMORY_WRITE_FAIL\r\n");
             }
         }
     }    
