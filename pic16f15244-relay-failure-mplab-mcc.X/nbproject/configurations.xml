@@ -555,13 +555,14 @@
       </makeCustomizationType>
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
+        <property key="appendMe" value=""/>
         <property key="asmlist" value="true"/>
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
         <property key="define-macros" value=""/>
         <property key="disable-optimizations" value="false"/>
-        <property key="extra-include-directories" value=""/>
+        <property key="extra-include-directories" value="mcc_generated_files"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>
