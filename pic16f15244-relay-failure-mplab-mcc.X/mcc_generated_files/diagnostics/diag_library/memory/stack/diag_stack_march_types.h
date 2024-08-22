@@ -42,14 +42,14 @@
  * @def STACKBUFFER_LOC
  * This macro defines the RAM address where the march test buffer address is stored.
  */
-#define STACKBUFFER_LOC (0x22)
+#define STACKBUFFER_LOC (0x2D)
 
 /**
  * @def STACK_BUFFER_ADDRESS
  * This macro defines the buffer address to store the contents of the stack.
  */
 /* cppcheck-suppress misra-c2012-2.5 */
-#define STACK_BUFFER_ADDRESS ((uint8_t*) 0x27)
+#define STACK_BUFFER_ADDRESS ((uint8_t*) 0x2F)
 
 /**
  * @def STACK_LEVEL This macro defines the stack level on the enhanced mid-range PIC16F devices.

@@ -45,10 +45,10 @@
 #define RELAY_TOGGLE_TIME 5000
 
 //How often should the PFM be scanned? (~1ms per count)
-#define FUSA_MEM_SELF_TEST 120000
+#define FUSA_MEM_SELF_TEST 2000
 
 //How often should the standard FUSA tests run? (~1ms per count)
-#define FUSA_SELF_TEST 6000
+#define FUSA_SELF_TEST 1000
 
 #define GPRCOUNT _GPRCOUNT_
 
@@ -84,7 +84,7 @@ static const uint16_t endAddressTable[GPRCOUNT] = {
 };
 
 //Bank used for buffer
-#define BANK3 3
+#define BANK3 6
 
 //EEPROM Version ID
 #define EEPROM_VERSION 0x01
@@ -98,8 +98,8 @@ static volatile bool runMemTest = false;
 //Memory Bank to scan
 static volatile uint8_t memBank = 0;
 
-//Set to true when a periodic fusa test has passed (for printing only)
-static volatile bool periodicFusaPass = false;
+//Set to true when a periodic fusa should be run
+static volatile bool runFusaTest = false;
 
 //Tests a memory bank
 diag_result_t Application_testMemoryBank(uint8_t bank)
@@ -135,18 +135,22 @@ diag_result_t Application_testMemoryBank(uint8_t bank)
 }
 
 //Run a periodic self-test
-diag_result_t Application_runPeriodicSelfTest(void)
+diag_result_t Application_runPeriodicFusaSelfTest(void)
 {
+    INTERRUPT_GlobalInterruptDisable();
+    
     //CPU Test
     if (DIAG_CPU_Registers() != DIAG_PASS)
     {
+        INTERRUPT_GlobalInterruptEnable();
         return DIAG_FAIL;
     }
     
     //Rotate through SRAM
     if (Application_testMemoryBank(memBank) != DIAG_PASS)
     {
-        return DIAG_FAIL;
+        INTERRUPT_GlobalInterruptEnable();
+        return DIAG_FAIL; //    //Rotate through SRAM
     }
     
     //Increment to the next memory bank
@@ -159,8 +163,7 @@ diag_result_t Application_runPeriodicSelfTest(void)
         memBank = 0;
     }
     
-    periodicFusaPass = true;
-    
+    INTERRUPT_GlobalInterruptEnable();
     return DIAG_PASS;
 }
 
@@ -197,12 +200,7 @@ void Application_PeriodicScan(void)
     {
         fusaCounter = 0;
         
-        //Periodic Fusa Tests
-        if (Application_runPeriodicSelfTest() != DIAG_PASS)
-        {
-            Relay_SetError(ERROR_SELF_TEST_FAIL);
-        }
-        
+        runFusaTest = true;        
     }
     else
     {
@@ -224,6 +222,33 @@ void Application_PeriodicScan(void)
     
     //Clear WDT
     CLRWDT();
+}
+
+//Run the stack test
+//DO NOT CALL THIS DIRECTLY
+void _Application_runStackTest(void)
+{
+    //Stack
+    DIAG_MarchBufferStackAddress = STACK_BUFFER_ADDRESS;
+
+    if (DIAG_STACK_MarchCMinus() == DIAG_PASS)
+    {
+        printf("Stack Self-Test OK\r\n");
+    }
+    else
+    {
+        printf("Stack Self-Test Failed\r\n");
+        Relay_SetError(ERROR_SELF_TEST_FAIL);
+    }
+
+}
+
+//Call this function from main to enter the stack self-test
+void Application_enterStackTest(void)
+{
+    _Application_runStackTest();
+    NOP();
+    NOP();
 }
 
 //Check the self-tests
@@ -288,17 +313,7 @@ void Application_CheckStartupTests(void)
             printf("SRAM Bank %u Self-Test Failed - Unknown Error\r\n", i);
             Relay_SetError(ERROR_SELF_TEST_FAIL);
         }
-    }
-    
-//    //Stack
-//    if (DIAG_STACK_MarchCMinus() == DIAG_PASS)
-//    {
-//        printf("Stack Self-Test OK\r\n");
-//    }
-//    else
-//    {
-//        printf("Stack Self-Test Failed\r\n");
-//    }
+    }   
 }
 
 int main(void)
@@ -306,6 +321,7 @@ int main(void)
     SYSTEM_Initialize();
     
     printf("PIC16F15244 Relay Failure Detector\r\n");
+    printf("Starting up...\r\n");
     
     //Check to see if the CRC has been programmed
     if (FLASH_Read(EEPROM_VERSION_ADDR) != EEPROM_VERSION)
@@ -360,10 +376,11 @@ int main(void)
         printf("Memory ID OK\r\n");
     }
     
+    //Stack
+    Application_enterStackTest();
+    
     //Check Functional Safety Tests
     Application_CheckStartupTests();
-    
-    //TODO: Implement periodic FUSA 
 
     printf("\r\n");
     
@@ -389,7 +406,7 @@ int main(void)
     {        
         if (runMemTest)
         {
-            //Enable WDT
+            //Disable WDT
             WDTCONbits.SEN = 0;
             
             //Clear flag
@@ -410,24 +427,25 @@ int main(void)
                 Relay_SetError(ERROR_SELF_TEST_FAIL);
             }
             
-//            //Run a Stack Test
-//            if (DIAG_STACK_MarchCMinus() == DIAG_PASS)
-//            {
-//                printf("Periodic Stack Self-Test OK\r\n");
-//            }
-//            else
-//            {
-//                printf("Periodic Stack Self-Test Failed\r\n");
-//            }
+            //Run a Stack Test
+            Application_enterStackTest();
             
             //Enable WDT
             WDTCONbits.SEN = 1;
         }
         
-        if (periodicFusaPass)
+        if (runFusaTest)
         {
-            periodicFusaPass = false;
-            printf("Periodic Self-Test OK\r\n");
+            runFusaTest = false;
+            
+            if (Application_runPeriodicFusaSelfTest() == DIAG_PASS)
+            {
+                printf("Periodic Self-Test OK\r\n");
+            }
+            else
+            {
+                printf("Periodic Self-Test Failed\r\n");
+            }
         }
         
         if (Relay_hasErrorOccurred())
