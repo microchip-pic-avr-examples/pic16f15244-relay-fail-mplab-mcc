@@ -14,22 +14,19 @@ Electro-mechanical relays are a common component used to isolate power or signal
 
 ## Related Documentation
 
-<!-- Any information about an application note or tech brief can be linked here. Use unbreakable links!
-     In addition a link to the device family landing page and relevant peripheral pages as well:
-     - [AN3381 - Brushless DC Fan Speed Control Using Temperature Input and Tachometer Feedback](https://microchip.com/00003381/)
-     - [PIC18F-Q10 Family Product Page](https://www.microchip.com/design-centers/8-bit/pic-mcus/device-selection/pic18f-q10-product-family) -->
+- [Class B Safety Libraries for 8-bit Microcontrollers](https://www.microchip.com/en-us/products/microcontrollers-and-microprocessors/8-bit-mcus/functional-safety?utm_source=Github&utm_medium=TextLink&utm_campaign=MCU8_PIC16F15244&utm_content=pic16f15245-relay-failure-mplab-mcc-github&utm_bu=MCU08)    
+- [PIC16F15244 Family Overview](https://www.microchip.com/en-us/products/microcontrollers-and-microprocessors/8-bit-mcus/pic-mcus/pic16f15244?utm_source=Github&utm_medium=TextLink&utm_campaign=MCU8_PIC16F15244&utm_content=pic16f15245-relay-failure-mplab-mcc-github&utm_bu=MCU08)  
 
 ## Software Used
 
-- MPLAB® X IDE 6.20.0 or newer [(MPLAB® X IDE 6.20)](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide)
-- MPLAB XC8 2.46.0 or newer compiler [(MPLAB® XC8 2.46)](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/xc8)
-- MPLAB Code Configurator (MCC)
+- [MPLAB® X IDE 6.20.0 or newer](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide)
+- [MPLAB XC8 2.46.0 or newer compiler](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/xc8)
+- [MPLAB Code Configurator (MCC)](https://www.microchip.com/en-us/tools-resources/configure/mplab-code-configurator)  
 - PIC16F1xxxx_DFP v1.25.389
 
 ## Hardware Used
 
-See BOM Document
-- Microcontroller: [PIC16F15245](#)
+- Microcontroller: [PIC16F15245](https://www.microchip.com/en-us/product/PIC16F15245?utm_source=Github&utm_medium=TextLink&utm_campaign=MCU8_PIC16F15244&utm_content=pic16f15245-relay-failure-mplab-mcc-github&utm_bu=MCU08)  
 
 ![Schematic](./images/schematic.png)  
 
@@ -95,7 +92,7 @@ This application controls and monitors an electromechanical relay to ensure the 
 
 **Note: The relay used in this example is non-latching.**
 
-On POR, the microcontroller starts in the `OPEN` state. Every five seconds, the microcontroller gets an interrupt from Timer 2 to switch the relay ON/OFF. When this occurs, the microcontroller transitions to the `RELAY_OPEN_TRANSITION_CLOSED` or `RELAY_CLOSE_TRANSITION_OPEN` state and switches the relay coil transistor ON or OFF. 
+On POR, the microcontroller starts in the `OPEN` state. **Every five seconds**, the microcontroller gets an interrupt from Timer 2 to switch the relay ON/OFF. When this occurs, the microcontroller transitions to the `RELAY_OPEN_TRANSITION_CLOSED` or `RELAY_CLOSE_TRANSITION_OPEN` state and switches the relay coil transistor ON or OFF. 
 
 When switched, relay contacts bounce for a few milliseconds. The ADC constantly monitors the output, but in these transition states, the output is ignored for a few milliseconds (see relay datasheet) to avoid contact bounce. The delay time is controlled by `RELAY_CLOSE_TIME_MAX` and `RELAY_OPEN_TIME_MAX`. After these have elapsed, the relay must reach the desired state within `RELAY_MARGIN` milliseconds, or it will be considered a malfunction. If a malfunction occurs, the relay will cease switching until the pushbutton is pressed.
 
@@ -150,8 +147,8 @@ Green LED - Transistor Drive State (LAT)
 Yellow LED - Load  
 Button - Clear errors  
 
-JP1 (Normally Open) - Short to simulate a welded contact  
-JP2 (Normally Short) - Open to simulate a jammed contact  
+JP1 (Normally Open) - Short to simulate a jammed contact  
+JP2 (Normally Short) - Open to simulate a welded contact  
 
 ## Summary
 
