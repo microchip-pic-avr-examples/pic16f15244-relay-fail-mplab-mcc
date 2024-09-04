@@ -10,12 +10,13 @@
 
 # Detecting Relay Failures with the PIC16F15245 MCU
 
-Electro-mechanical relays are a common component used to isolate power or signals. However, relays can fail over time due to mechanical wear, electrical contacts wearing out, armatures jamming, or burned out coils. This example shows a simple way to detect a failed relay using the Analog to Digital Converter (ADC) with the PIC16F15245 microcontroller. For additional reliability, class B functional safety libraries are also used to verify the microcontroller is operating correctly. 
+ This example shows a simple way to detect a failed relay using the Analog to Digital Converter (ADC) with the PIC16F15245 microcontroller. Electro-mechanical relays are a common component used to isolate power or signals. However, relays can fail over time due to mechanical wear, electrical contacts wearing out, armatures jamming, or burned out coils. For additional reliability, class B functional safety libraries are also used to verify the microcontroller is operating correctly. 
 
 ## Related Documentation
 
 - [Class B Safety Libraries for 8-bit Microcontrollers](https://www.microchip.com/en-us/products/microcontrollers-and-microprocessors/8-bit-mcus/functional-safety?utm_source=Github&utm_medium=TextLink&utm_campaign=MCU8_PIC16F15244&utm_content=pic16f15245-relay-failure-mplab-mcc-github&utm_bu=MCU08)    
 - [PIC16F15244 Family Overview](https://www.microchip.com/en-us/products/microcontrollers-and-microprocessors/8-bit-mcus/pic-mcus/pic16f15244?utm_source=Github&utm_medium=TextLink&utm_campaign=MCU8_PIC16F15244&utm_content=pic16f15245-relay-failure-mplab-mcc-github&utm_bu=MCU08)  
+- [PIC16F15245 Microcontroller Datasheet](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/PIC16F15225-45-Microcontroller-Data-Sheet-20006389.pdf)  
 
 ## Software Used
 
@@ -58,7 +59,7 @@ This test verifies the SRAM is functioning correctly at Power-on-Reset (POR), an
 
 This test verifies the hardware stack in the microcontroller is operating correctly.
 
-- Watchdog
+- Watchdog Timer
 
 This test verifies the WDT hardware is operational at POR.  
 
@@ -88,7 +89,7 @@ If the `relayState` or `errorState` variables mismatch from a copy `relayState2`
 
 ## Theory of Operation
 
-This application controls and monitors an electromechanical relay to ensure the relay contacts have not jammed and are switching correctly. A simple state machine is used to keep track of the state of the relay.  
+This circuit controls and monitors an electromechanical relay to ensure the relay contacts have not jammed and are switching correctly. A simple state machine is used to keep track of the state of the relay.  
 
 **Note: The relay used in this example is non-latching.**
 
