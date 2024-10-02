@@ -41,6 +41,11 @@
 #include "diagnostics/diag_library/memory/volatile/diag_sram_checkerboard.h"
 #include "diagnostics/diag_library/memory/stack/diag_stack_marchc_minus.h"
 
+//If set, these enable the SRAM tests
+//REQUIRES LEVEL S OPTIMIZATIONS (PRO CONFIG)
+//#define ENABLE_SRAM_STARTUP_TEST
+//#define ENABLE_SRAM_PERIODIC_TEST
+
 //Defines the number of timer counts (~1ms per count) before the relay toggles
 #define RELAY_TOGGLE_TIME 5000
 
@@ -136,9 +141,7 @@ diag_result_t Application_testMemoryBank(uint8_t bank)
 
 //Run a periodic self-test
 diag_result_t Application_runPeriodicFusaSelfTest(void)
-{
-    INTERRUPT_GlobalInterruptDisable();
-    
+{    
     //CPU Test
     if (DIAG_CPU_Registers() != DIAG_PASS)
     {
@@ -146,15 +149,19 @@ diag_result_t Application_runPeriodicFusaSelfTest(void)
         return DIAG_FAIL;
     }
     
+#ifdef ENABLE_SRAM_PERIODIC_TEST
+    
     //Rotate through SRAM
     if (Application_testMemoryBank(memBank) != DIAG_PASS)
     {
         INTERRUPT_GlobalInterruptEnable();
-        return DIAG_FAIL; //    //Rotate through SRAM
+        return DIAG_FAIL; 
     }
+#endif
+    
     
     //Increment to the next memory bank
-    if (memBank < GPRCOUNT)
+    if (memBank < (GPRCOUNT - 1))
     {
         memBank++;
     }
@@ -163,7 +170,6 @@ diag_result_t Application_runPeriodicFusaSelfTest(void)
         memBank = 0;
     }
     
-    INTERRUPT_GlobalInterruptEnable();
     return DIAG_PASS;
 }
 
@@ -288,6 +294,8 @@ void Application_CheckStartupTests(void)
         printf("Flash CRC Self-Test OK\r\n");
     }
     
+#ifdef ENABLE_SRAM_STARTUP_TEST
+    
     //SRAM
     //Test all banks    
     for (uint8_t i = 0; i < GPRCOUNT; i++)
@@ -314,12 +322,16 @@ void Application_CheckStartupTests(void)
             Relay_SetError(ERROR_SELF_TEST_FAIL);
         }
     }   
+    
+#else
+    printf("SRAM Self-Tests Disabled (see README for more info)\r\n");
+#endif
 }
 
 int main(void)
 {
     SYSTEM_Initialize();
-    
+        
     printf("PIC16F15244 Relay Failure Detector\r\n");
     printf("Starting up...\r\n");
     
@@ -408,6 +420,7 @@ int main(void)
         {
             //Disable WDT
             WDTCONbits.SEN = 0;
+            INTERRUPT_GlobalInterruptDisable();
             
             //Clear flag
             runMemTest = false;
@@ -430,12 +443,19 @@ int main(void)
             //Run a Stack Test
             Application_enterStackTest();
             
+            //Re-enable interrupts
+            INTERRUPT_GlobalInterruptEnable();
+            
             //Enable WDT
             WDTCONbits.SEN = 1;
         }
         
         if (runFusaTest)
         {
+            //Disable WDT
+            WDTCONbits.SEN = 0;
+            INTERRUPT_GlobalInterruptDisable();
+            
             runFusaTest = false;
             
             if (Application_runPeriodicFusaSelfTest() == DIAG_PASS)
@@ -446,6 +466,12 @@ int main(void)
             {
                 printf("Periodic Self-Test Failed\r\n");
             }
+            
+            //Re-enable interrupts
+            INTERRUPT_GlobalInterruptEnable();
+            
+            //Enable WDT
+            WDTCONbits.SEN = 1;
         }
         
         if (Relay_hasErrorOccurred())

@@ -28,7 +28,8 @@ void Relay_SetError(error_state_t error)
     
     //Verify the error parameter is valid
     if ((error != ERROR_RELAY_STUCK) && (error != ERROR_TRANSISTOR_SHORT) &&
-            (error != ERROR_SELF_TEST_FAIL) && (error != ERROR_ILLEGAL_STATE))
+        (error != ERROR_SELF_TEST_FAIL) && (error != ERROR_ILLEGAL_STATE) &&
+        (error != ERROR_OUTPUT_BROWNOUT) && (error != ERROR_MEMORY_WRITE_FAIL))
     {
         error = ERROR_ILLEGAL_STATE;
     }

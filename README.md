@@ -8,9 +8,9 @@
    </picture>
 </a>
 
-# Detecting Relay Failures with the PIC16F15245 MCU
+# Detecting Relay Failures With the PIC16F15245 Microcontroller
 
- This example shows a simple way to detect a failed relay using the Analog to Digital Converter (ADC) with the PIC16F15245 microcontroller. Electro-mechanical relays are a common component used to isolate power or signals. However, relays can fail over time due to mechanical wear, electrical contacts wearing out, armatures jamming, or burned out coils. For additional reliability, class B functional safety libraries are also used to verify the microcontroller is operating correctly. 
+ This example shows a simple way to detect a failed relay using the Analog-to-Digital Converter (ADC) with the PIC16F15245 microcontroller (MCU). Electro-mechanical relays are a common component used to isolate power or signals. However, relays can fail over time due to mechanical wear, electrical contacts wearing out, armatures jamming, or burned out coils. For additional reliability, class B functional safety libraries are also used to verify the MCU is operating correctly. 
 
 ## Related Documentation
 
@@ -37,7 +37,7 @@ For demonstration purposes, the following design was assembled on a protoboard.
 
 ![Prototype Board](./images/prototype.JPG)  
 
-**Note: Component values are application specific. Please see the Design Procedure section for more information.**
+**Note**: Component values are application specific. Please see the Design Procedure section for more information.
 
 ## Self-Tests
 
@@ -53,11 +53,13 @@ This test verifies the Flash program memory matches the expected checksum.
 
 - SRAM
 
-This test verifies the SRAM is functioning correctly at Power-on-Reset (POR), and periodically scans each memory bank at runtime.
+This test verifies the SRAM is functioning correctly at Power-on-Reset (POR), and periodically scans each memory bank at run time.
+
+**Note**: The SRAM test is only recommended with level S (Pro configuration) optimizations.
 
 - Stack
 
-This test verifies the hardware stack in the microcontroller is operating correctly.
+This test verifies the hardware stack in the MCU is operating correctly.
 
 - Watchdog Timer
 
@@ -69,7 +71,7 @@ This test verifies the WDT hardware is operational at POR.
 
 If the PORT value (digital input) on the transistor pin does not match the expected `LAT` state (digital output), then the transistor has failed short to VDD or GND.
 
-**Note: If the relay coil runs from a voltage higher than the microcontroller (ex: +12V), then a short to VDD could expose the microcontroller to this voltage.**
+**Note**: If the relay coil runs from a voltage higher than the MCU (e.g.: +12V), then a short to VDD could expose the MCU to this voltage.
 
 - Relay Jammed
 
@@ -79,9 +81,9 @@ If the relay does not transition to the correct state within the time limits set
 
 This occurs if the relay is in the open state, and a voltage is detected or if the relay is in a closed state, and no voltage is detected. 
 
-- Bad Connection / Brownout
+- Bad Connection/Brown out
 
-If the relay is in a steady state OPEN/CLOSED, and the voltage is at an invalid level, then the device reports a brownout or bad connection. 
+If the relay is in a steady state OPEN/CLOSED, and the voltage is at an invalid level, then the device reports a brown out or bad connection. 
 
 - SRAM Variables Corruption
 
@@ -91,13 +93,13 @@ If the `relayState` or `errorState` variables mismatch from a copy `relayState2`
 
 This circuit controls and monitors an electromechanical relay to ensure the relay contacts have not jammed and are switching correctly. A simple state machine is used to keep track of the state of the relay.  
 
-**Note: The relay used in this example is non-latching.**
+**Note**: The relay used in this example is non-latching.
 
-On POR, the microcontroller starts in the `OPEN` state. **Every five seconds**, the microcontroller gets an interrupt from Timer 2 to switch the relay ON/OFF. When this occurs, the microcontroller transitions to the `RELAY_OPEN_TRANSITION_CLOSED` or `RELAY_CLOSE_TRANSITION_OPEN` state and switches the relay coil transistor ON or OFF. 
+On POR, the MCU starts in the `OPEN` state. Every five seconds, the MCU gets an interrupt from Timer 2 to switch the relay ON/OFF. When this occurs, the MCU transitions to the `RELAY_OPEN_TRANSITION_CLOSED` or `RELAY_CLOSE_TRANSITION_OPEN` state and switches the relay coil transistor ON or OFF. 
 
-When switched, relay contacts bounce for a few milliseconds. The ADC constantly monitors the output, but in these transition states, the output is ignored for a few milliseconds (see relay datasheet) to avoid contact bounce. The delay time is controlled by `RELAY_CLOSE_TIME_MAX` and `RELAY_OPEN_TIME_MAX`. After these have elapsed, the relay must reach the desired state within `RELAY_MARGIN` milliseconds, or it will be considered a malfunction. If a malfunction occurs, the relay will cease switching until the pushbutton is pressed.
+When switched, relay contacts bounce for a few milliseconds. The ADC constantly monitors the output, but in these transition states, the output is ignored for a few milliseconds (see the relay data sheet) to avoid contact bounce. The delay time is controlled by `RELAY_CLOSE_TIME_MAX` and `RELAY_OPEN_TIME_MAX`. After these have elapsed, the relay must reach the desired state within `RELAY_MARGIN` milliseconds, or it will be considered a malfunction. If a malfunction occurs, the relay will cease switching until the push button is pressed.
 
-To determine the relay state, two constants `ADC_THRESHOLD_HIGH` and `ADC_THRESHOLD_LOW` are used as thresholds for ON and OFF. The PIC16F15244 family of microcontrollers have a 10-bit ADC and a Fixed Voltage Reference (FVR). To convert a voltage into a threshold, the following formula can be used:
+To determine the relay state, two constants `ADC_THRESHOLD_HIGH` and `ADC_THRESHOLD_LOW`, are used as thresholds for ON and OFF. The PIC16F15244 family of MCUs has a 10-bit ADC and a Fixed Voltage Reference (FVR). To convert a voltage into a threshold, the following formula can be used:
 
 DIGITAL = V<sub>AN</sub>* 2<sup>N</sup> / V<sub>REF</sub>
 
@@ -123,7 +125,7 @@ A bit mask of error flags are defined to detect if an error occurs.
 
 ## Design Procedure
 
-Often relays switch voltages that are far above the absolute maximum rating of the MCU. To avoid damage, the microcontroller needs to measure a scaled down version of the signal. If the microcontroller and signal don't require isolation, a voltage divider can be used. If isolation is required, a device like an optocoupler can be used. 
+Often relays switch voltages that are far above the absolute maximum rating of the MCU. To avoid damage, the MCU needs to measure a scaled down version of the signal. If the MCU and signal don't require isolation, a voltage divider can be used. If isolation is required, a device like an optocoupler can be used. 
 
 ### Voltage Divider (Non-Isolated)
 
@@ -135,11 +137,11 @@ When the ADC starts a measurement, a capacitor is connected from the center node
 
 R<sub>EQ</sub> = 1 / ((1 / R<sub>1</sub>) + (1 / R<sub>2</sub>))
 
-On the PIC16F15244 family, the acquisition time is fixed at 2 &micro;S. The datasheet recommends an impedance of 10 k&Omega; or less. Impedances above this value will function, however it will take multiple sampling cycles for the measured to approach the expected value.  
+On the PIC16F15244 family, the acquisition time is fixed at 2 &micro;S. The data sheet recommends an impedance of 10 k&Omega; or less. Impedances above this value will function, however it will take multiple sampling cycles for the measured to approach the expected value.  
 
 ### Opto-coupler (Isolated)
 
-If isolation is required, a linear optocoupler is a simple way of providing feedback to the microcontroller. An optocoupler is composed of two elements: an LED and a photodiode/phototransistor inside a single package. The output of a linear optocoupler is a function of the current through the LED. For detailed design guidence on the optocoupler, please consult the manufacturer's documentation.  
+If isolation is required, a linear optocoupler is a simple way of providing feedback to the MCU. An optocoupler is composed of two elements: an LED and a photodiode/phototransistor inside a single package. The output of a linear optocoupler is a function of the current through the LED. For detailed design guidence on the optocoupler, please consult the manufacturer's documentation.  
 
 ## Operation
 
@@ -153,4 +155,4 @@ JP2 (Normally Short) - Open to simulate a welded contact
 
 ## Summary
 
-This example has shown how to implement a relay failure detector on the PIC16F15244 family of microcontrollers.
+This example has shown how to implement a relay failure detector on the PIC16F15244 family of MCUs.
